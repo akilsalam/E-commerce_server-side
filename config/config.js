@@ -22,10 +22,26 @@ const UserSchema = new mongoose.Schema({
         type:String,
         required:true
     },
-    phone:{
+    pincode:{
         type:Number,
         required:true
     },
+    locality:{
+      type:String,
+      required:true
+    },
+    town:{
+      type:String,
+      required:true
+    },
+    state:{
+      type:String,
+      required:true
+    },
+    phone: {
+      type: String, // Change the type to String
+      required: true
+  },
     email:{
         type:String,
         required:true
@@ -52,45 +68,61 @@ const ProductSchema = new mongoose.Schema({
     title: {
         type: String,
         required: true
-    },
-    description: {
+      },
+      description: {
         type: String,
         required: true
-    },
-    category: {
+      },
+      brand: {
         type: String,
         required: true
-    },
-    brand: {
+      },
+      category: {
         type: String,
         required: true
-    },
-    rating: {
+      },
+      discountPercentage: {
         type: Number,
         required: true
-    },
-    discountPercentage: {
+      },
+      images: {
+        type: Array,
+        required: true
+      },
+      price: {
         type: Number,
         required: true
-    },
-    size: {
+      },
+      rating: {
+        type: Number,
+        // required: true
+      },
+      stock: {
+        type: Number,
+        required: true
+      },
+      thumbnail: {
         type: String,
-        required: true
-    },
-    price: {
-        type: Number,
-        required: true
-    },
-    stock: {
-        type: Number,
-        required: true
-    },
-    thumbnail: {
-        type: String,
-        required: true
-    },
+        // required: true
+      },
+    //   isAdded:{
+    //     type:Boolean
+    //   }
+
 });
 
+const Lights = mongoose.model('Lights',ProductSchema)
+const Fragrances = mongoose.model('Fragrances',ProductSchema)
+const Sunglasses = mongoose.model('Sunglasses',ProductSchema)
+const Automotives = mongoose.model('Automotives',ProductSchema)
+const WomensJewellery = mongoose.model('WomensJewellery',ProductSchema)
+const WomensWatches = mongoose.model('WomensWatches',ProductSchema)
+const WomensFootwear = mongoose.model('WomensFootwear',ProductSchema)
+const WomensClothes = mongoose.model('WomensClothes',ProductSchema)
+const Bags = mongoose.model('Bags',ProductSchema)
+const MensWatches = mongoose.model('MensWatches',ProductSchema)
+const MensFootwear = mongoose.model('MensFootwear',ProductSchema)
+const MensClothes = mongoose.model('MensClothes',ProductSchema)
 const TwoWheelers = mongoose.model('TwoWheelers',ProductSchema)
 const BeautyToys = mongoose.model('BeautyToys',ProductSchema)
 const Appliances = mongoose.model('Appliances',ProductSchema)
@@ -101,5 +133,8 @@ const Mobiles = mongoose.model('MobileItem',ProductSchema)
 const Grocery = mongoose.model('GroceryItem', ProductSchema);
 const Admin = new mongoose.model("admin",AdminSchema)
 const Users = new mongoose.model("users",UserSchema)
+const Carts = mongoose.model('carts', ProductSchema);
+const WishList = mongoose.model('wishlist', ProductSchema);
 
-module.exports = {Users,Admin,Grocery,Mobiles,Fashions,Electronics,HomeFurniture,Appliances,BeautyToys,TwoWheelers}
+
+module.exports = {Users,Admin,Grocery,Mobiles,Fashions,Electronics,HomeFurniture,Appliances,BeautyToys,TwoWheelers,MensClothes,MensFootwear,MensWatches,Bags,WomensClothes,WomensFootwear,WomensWatches,WomensJewellery,Automotives,Sunglasses,Fragrances,Lights,Carts,WishList}
