@@ -1,7 +1,8 @@
 var express = require('express');
 var router = express.Router();
 const bcrypt = require('bcrypt');
-const { Admin,Lights,Fragrances,Sunglasses,Automotives,WomensJewellery,WomensClothes,WomensWatches,WomensFootwear,Bags,MensClothes,MensFootwear,MensWatches,Grocery,Mobiles,Fashions,Electronics,HomeFurniture,Appliances,BeautyToys,TwoWheelers, Users } = require('../config/config');
+const multer = require('multer');
+const { Admin,Lights,Fragrances,Sunglasses,Automotives,WomensJewellery,WomensClothes,WomensWatches,WomensFootwear,Bags,MensClothes,MensFootwear,MensWatches,Grocery,Mobiles,Fashions,Electronics,HomeFurniture,Appliances,BeautyToys,TwoWheelers, Users, Products, Order } = require('../config/config');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -35,7 +36,7 @@ router.post('/login', async function (req, res, next) {
 
 router.get('/users', async (req, res) => {
   try {
-    const users = await Users.find();
+    const users = await Users.find().sort({ _id: -1 })
     res.json(users);
   } catch (error) {
     console.error('Error fetching data:', error);
@@ -48,11 +49,15 @@ router.post('/addUser', async function(req, res, next) {
     first_name: req.body.firstData,
     last_name: req.body.lastData,
     address: req.body.address,
+    pincode: req.body.pincode,
+    locality: req.body.locality,
+    town: req.body.town,
+    state: req.body.state,
     phone: req.body.phone,
     email: req.body.emailData,
     password: req.body.passwordData
   };
-  const existingUser = await Users.findOne({ email: inputData.email });
+  const existingUser = await Users.findOne({ $or: [{ email: inputData.email }, { phone: inputData.phone }] });
   if (existingUser) {
     // User already exists
     res.json({ success: false, message: 'User already exists.Please enter another username' });
@@ -136,33 +141,26 @@ router.delete('/deleteUser/:id', async (req, res, next) => {
 
 router.get('/products', async (req, res) => {
   try {
-    const allProducts = {
-      lights: await Lights.find(),
-      fragrances: await Fragrances.find(),
-      sunglasses: await Sunglasses.find(),
-      automotives: await Automotives.find(),
-      jewellery: await WomensJewellery.find(),
-      womensWatches: await WomensWatches.find(),
-      womensFootwear: await WomensFootwear.find(),
-      womensClothes: await WomensClothes.find(),
-      bags: await Bags.find(),
-      mensWatches: await MensWatches.find(),
-      mensFootwear: await MensFootwear.find(),
-      mensClothes: await MensClothes.find(),
-      groceries: await Grocery.find(),
-      mobiles: await Mobiles.find(),
-      fashions: await Fashions.find(),
-      electronics: await Electronics.find(),
-      homeFurniture: await HomeFurniture.find(),
-      appliances: await Appliances.find(),
-      beautyToys: await BeautyToys.find(),
-      twoWheelers: await TwoWheelers.find(),
-    };
-    
-    res.json(allProducts);
+    const products = await Products.find().sort({ _id: -1 });
+    res.json(products);
   } catch (error) {
     console.error('Error fetching data:', error);
     res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+router.get('/otherImages/:id', async (req, res) => {
+  const productId = req.params.id;
+
+  try {
+
+    const product = await Products.findById(productId);
+      return res.send(product);
+
+  } catch (error) {
+    console.error('Error fetching product data:', error);
+    res.status(500).send({ error: 'Internal Server Error' });
   }
 });
 
@@ -170,113 +168,12 @@ router.get('/editProduct/:id', async (req, res) => {
   const productId = req.params.id;
 
   try {
-    let productData;
 
-    // Fetch data from Lights collection
-    productData = await Lights.findById(productId);
+    const productData = await Products.findById(productId);
     if (productData && productData._id.toString() === productId) {
-      return res.send({ lights: productData });
+      return res.send({ product: productData });
     }
 
-    // Fetch data from Fragrances collection
-    productData = await Fragrances.findById(productId);
-    if (productData && productData._id.toString() === productId) {
-      return res.send({ fragrances: productData });
-    }
-
-    productData = await Sunglasses.findById(productId);
-    if (productData && productData._id.toString() === productId) {
-      return res.send({ fragrances: productData });
-    }
-
-    productData = await Automotives.findById(productId);
-    if (productData && productData._id.toString() === productId) {
-      return res.send({ fragrances: productData });
-    }
-
-    productData = await WomensJewellery.findById(productId);
-    if (productData && productData._id.toString() === productId) {
-      return res.send({ fragrances: productData });
-    }
-
-    productData = await WomensWatches.findById(productId);
-    if (productData && productData._id.toString() === productId) {
-      return res.send({ fragrances: productData });
-    }
-
-    productData = await WomensFootwear.findById(productId);
-    if (productData && productData._id.toString() === productId) {
-      return res.send({ fragrances: productData });
-    }
-
-    productData = await WomensClothes.findById(productId);
-    if (productData && productData._id.toString() === productId) {
-      return res.send({ fragrances: productData });
-    }
-
-    productData = await Bags.findById(productId);
-    if (productData && productData._id.toString() === productId) {
-      return res.send({ fragrances: productData });
-    }
-
-    productData = await MensWatches.findById(productId);
-    if (productData && productData._id.toString() === productId) {
-      return res.send({ fragrances: productData });
-    }
-
-    productData = await MensFootwear.findById(productId);
-    if (productData && productData._id.toString() === productId) {
-      return res.send({ fragrances: productData });
-    }
-
-    productData = await MensClothes.findById(productId);
-    if (productData && productData._id.toString() === productId) {
-      return res.send({ fragrances: productData });
-    }
-
-    productData = await Grocery.findById(productId);
-    if (productData && productData._id.toString() === productId) {
-      return res.send({ fragrances: productData });
-    }
-
-    productData = await Mobiles.findById(productId);
-    if (productData && productData._id.toString() === productId) {
-      return res.send({ fragrances: productData });
-    }
-
-    productData = await Fashions.findById(productId);
-    if (productData && productData._id.toString() === productId) {
-      return res.send({ fragrances: productData });
-    }
-
-    productData = await Electronics.findById(productId);
-    if (productData && productData._id.toString() === productId) {
-      return res.send({ fragrances: productData });
-    }
-
-    productData = await HomeFurniture.findById(productId);
-    if (productData && productData._id.toString() === productId) {
-      return res.send({ fragrances: productData });
-    }
-
-    productData = await Appliances.findById(productId);
-    if (productData && productData._id.toString() === productId) {
-      return res.send({ fragrances: productData });
-    }
-
-    productData = await BeautyToys.findById(productId);
-    if (productData && productData._id.toString() === productId) {
-      return res.send({ fragrances: productData });
-    }
-
-    productData = await TwoWheelers.findById(productId);
-    if (productData && productData._id.toString() === productId) {
-      return res.send({ fragrances: productData });
-    }
-
-    // Repeat the same pattern for other collections...
-
-    // If no matching data found
     res.status(404).send({ error: 'Product not found' });
   } catch (error) {
     console.error('Error fetching product data:', error);
@@ -286,117 +183,15 @@ router.get('/editProduct/:id', async (req, res) => {
 
 router.post('/editProduct/:id', async (req, res) => {
   const productId = req.params.id;
-  const updatedData = req.body; // Assuming the updated data is sent in the request body
+  const updatedData = req.body;
 
   try {
-    let product;
 
-    // Find and update data in Lights collection
-    product = await Lights.findByIdAndUpdate(productId, updatedData, { new: true });
+    const product = await Products.findByIdAndUpdate(productId, updatedData, { new: true });
     if (product) {
-      return res.send({ lights: product });
+      return res.send({ product : product });
     }
 
-    // Find and update data in Fragrances collection
-    product = await Fragrances.findByIdAndUpdate(productId, updatedData, { new: true });
-    if (product) {
-      return res.send({ fragrances: product });
-    }
-
-    // Find and update data in Sunglasses collection
-    product = await Sunglasses.findByIdAndUpdate(productId, updatedData, { new: true });
-    if (product) {
-      return res.send({ fragrances: product });
-    }
-
-    product = await Automotives.findByIdAndUpdate(productId, updatedData, { new: true });
-    if (product) {
-      return res.send({ automotives: product });
-    }
-
-    product = await WomensJewellery.findByIdAndUpdate(productId, updatedData, { new: true });
-    if (product) {
-      return res.send({ jewellery: product });
-    }
-
-    product = await WomensWatches.findByIdAndUpdate(productId, updatedData, { new: true });
-    if (product) {
-      return res.send({ Womenwatches: product });
-    }
-
-    product = await WomensFootwear.findByIdAndUpdate(productId, updatedData, { new: true });
-    if (product) {
-      return res.send({ Womenfootwear: product });
-    }
-
-    product = await WomensClothes.findByIdAndUpdate(productId, updatedData, { new: true });
-    if (product) {
-      return res.send({ Womenclothes: product });
-    }
-
-    product = await Bags.findByIdAndUpdate(productId, updatedData, { new: true });
-    if (product) {
-      return res.send({ bags: product });
-    }
-
-    product = await MensClothes.findByIdAndUpdate(productId, updatedData, { new: true });
-    if (product) {
-      return res.send({ Menclothes: product });
-    }
-
-    product = await MensWatches.findByIdAndUpdate(productId, updatedData, { new: true });
-    if (product) {
-      return res.send({ Menwatches: product });
-    }
-
-    product = await MensFootwear.findByIdAndUpdate(productId, updatedData, { new: true });
-    if (product) {
-      return res.send({ Mensfootwear: product });
-    }
-
-    product = await Grocery.findByIdAndUpdate(productId, updatedData, { new: true });
-    if (product) {
-      return res.send({ grocery: product });
-    }
-
-    product = await Mobiles.findByIdAndUpdate(productId, updatedData, { new: true });
-    if (product) {
-      return res.send({ mobiles: product });
-    }
-
-    product = await Fashions.findByIdAndUpdate(productId, updatedData, { new: true });
-    if (product) {
-      return res.send({ fashions: product });
-    }
-
-    product = await Electronics.findByIdAndUpdate(productId, updatedData, { new: true });
-    if (product) {
-      return res.send({ electronics: product });
-    }
-
-    product = await HomeFurniture.findByIdAndUpdate(productId, updatedData, { new: true });
-    if (product) {
-      return res.send({ homefurniture: product });
-    }
-
-    product = await Appliances.findByIdAndUpdate(productId, updatedData, { new: true });
-    if (product) {
-      return res.send({ appliances: product });
-    }
-
-    product = await  BeautyToys.findByIdAndUpdate(productId, updatedData, { new: true });
-    if (product) {
-      return res.send({ beautytoys: product });
-    }
-
-    product = await TwoWheelers.findByIdAndUpdate(productId, updatedData, { new: true });
-    if (product) {
-      return res.send({ twoWheelers: product });
-    }
-
-    // Repeat the same pattern for other collections...
-
-    // If no matching data found
     res.status(404).send({ error: 'Product not found' });
   } catch (error) {
     console.error('Error updating product data:', error);
@@ -408,114 +203,12 @@ router.delete('/deleteProduct/:id', async (req, res) => {
   const productId = req.params.id;
 
   try {
-    let deletedProduct;
 
-    // Delete data from Lights collection
-    deletedProduct = await Lights.findByIdAndDelete(productId);
+    const deletedProduct = await Products.findByIdAndDelete(productId);
     if (deletedProduct) {
-      return res.send({ lights: deletedProduct, message: 'Product deleted successfully' });
+      return res.send({ product: deletedProduct, message: 'Product deleted successfully' });
     }
 
-    // Delete data from Fragrances collection
-    deletedProduct = await Fragrances.findByIdAndDelete(productId);
-    if (deletedProduct) {
-      return res.send({ fragrances: deletedProduct, message: 'Product deleted successfully' });
-    }
-
-    // Delete data from Sunglasses collection
-    deletedProduct = await Sunglasses.findByIdAndDelete(productId);
-    if (deletedProduct) {
-      return res.send({ sunglasses: deletedProduct, message: 'Product deleted successfully' });
-    }
-
-    deletedProduct = await Automotives.findByIdAndDelete(productId);
-    if (deletedProduct) {
-      return res.send({ sunglasses: deletedProduct, message: 'Product deleted successfully' });
-    }
-
-    deletedProduct = await WomensJewellery.findByIdAndDelete(productId);
-    if (deletedProduct) {
-      return res.send({ sunglasses: deletedProduct, message: 'Product deleted successfully' });
-    }
-
-    deletedProduct = await WomensWatches.findByIdAndDelete(productId);
-    if (deletedProduct) {
-      return res.send({ sunglasses: deletedProduct, message: 'Product deleted successfully' });
-    }
-
-    deletedProduct = await WomensFootwear.findByIdAndDelete(productId);
-    if (deletedProduct) {
-      return res.send({ sunglasses: deletedProduct, message: 'Product deleted successfully' });
-    }
-
-    deletedProduct = await WomensClothes.findByIdAndDelete(productId);
-    if (deletedProduct) {
-      return res.send({ sunglasses: deletedProduct, message: 'Product deleted successfully' });
-    }
-
-    deletedProduct = await Bags.findByIdAndDelete(productId);
-    if (deletedProduct) {
-      return res.send({ sunglasses: deletedProduct, message: 'Product deleted successfully' });
-    }
-
-    deletedProduct = await MensClothes.findByIdAndDelete(productId);
-    if (deletedProduct) {
-      return res.send({ sunglasses: deletedProduct, message: 'Product deleted successfully' });
-    }
-
-    deletedProduct = await MensWatches.findByIdAndDelete(productId);
-    if (deletedProduct) {
-      return res.send({ sunglasses: deletedProduct, message: 'Product deleted successfully' });
-    }
-
-    deletedProduct = await MensFootwear.findByIdAndDelete(productId);
-    if (deletedProduct) {
-      return res.send({ sunglasses: deletedProduct, message: 'Product deleted successfully' });
-    }
-
-    deletedProduct = await Grocery.findByIdAndDelete(productId);
-    if (deletedProduct) {
-      return res.send({ sunglasses: deletedProduct, message: 'Product deleted successfully' });
-    }
-
-    deletedProduct = await Mobiles.findByIdAndDelete(productId);
-    if (deletedProduct) {
-      return res.send({ sunglasses: deletedProduct, message: 'Product deleted successfully' });
-    }
-
-    deletedProduct = await Fashions.findByIdAndDelete(productId);
-    if (deletedProduct) {
-      return res.send({ sunglasses: deletedProduct, message: 'Product deleted successfully' });
-    }
-
-    deletedProduct = await Electronics.findByIdAndDelete(productId);
-    if (deletedProduct) {
-      return res.send({ sunglasses: deletedProduct, message: 'Product deleted successfully' });
-    }
-
-    deletedProduct = await HomeFurniture.findByIdAndDelete(productId);
-    if (deletedProduct) {
-      return res.send({ sunglasses: deletedProduct, message: 'Product deleted successfully' });
-    }
-
-    deletedProduct = await Appliances.findByIdAndDelete(productId);
-    if (deletedProduct) {
-      return res.send({ sunglasses: deletedProduct, message: 'Product deleted successfully' });
-    }
-
-    deletedProduct = await BeautyToys.findByIdAndDelete(productId);
-    if (deletedProduct) {
-      return res.send({ sunglasses: deletedProduct, message: 'Product deleted successfully' });
-    }
-
-    deletedProduct = await TwoWheelers.findByIdAndDelete(productId);
-    if (deletedProduct) {
-      return res.send({ sunglasses: deletedProduct, message: 'Product deleted successfully' });
-    }
-
-    // Repeat the same pattern for other collections...
-
-    // If no matching data found
     res.status(404).send({ error: 'Product not found' });
   } catch (error) {
     console.error('Error deleting product data:', error);
@@ -523,62 +216,170 @@ router.delete('/deleteProduct/:id', async (req, res) => {
   }
 });
 
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
-const multer = require('multer');
-const upload = multer();
+router.post('/addProduct', upload.single('thumbnail'), async (req, res, next) => {
+  const inputData = {
+    title: req.body.title,
+    brand: req.body.brand,
+    description: req.body.description,
+    category: req.body.category,
+    discountPercentage: req.body.discountPercentage,
+    price: req.body.price,
+    stock: req.body.stock,
+    images: [
+      req.file ? req.file.buffer.toString('base64') : req.body.image1,
+      req.file ? req.file.buffer.toString('base64') : req.body.image2,
+      req.file ? req.file.buffer.toString('base64') : req.body.image3
+    ],
+    thumbnail: req.file ? req.file.buffer.toString('base64') : req.body.thumbnail,
+  };
 
-// Define the route for adding a product to the wishlist based on user input
-router.post('/addProduct', upload.none(), async (req, res) => {
   try {
-    const { category, title, brand, description, price, discountPercentage, stock } = req.body;
-
-    // Validate user input
-    if (!category || !title || !price || !stock) {
-      return res.status(400).json({ error: 'Category, title, price, and stock are required' });
+    const existingProduct = await Products.findOne({ title: inputData.title });
+    if (existingProduct) {
+      return res.json({ success: false, message: 'Product with the same title already exists' });
     }
 
-    // Use a generic model based on the category
-    const model = getModelByCategory(category);
+    const newProduct = new Products(inputData);
+    const savedProduct = await newProduct.save();
 
-    if (!model) {
-      return res.status(400).json({ error: 'Invalid category' });
+    if (savedProduct) {
+      res.json({ success: true, message: 'Product added successfully' });
+    } else {
+      res.json({ success: false, message: 'Failed to add product' });
     }
-
-    // Construct product data without thumbnail
-    const productData = {
-      title,
-      brand,
-      description,
-      category,
-      price,
-      discountPercentage: discountPercentage || 0,
-      stock,
-    };
-
-    // Insert data into the specified collection
-    const insertedData = await model.create(productData);
-
-    res.json({ message: 'Product added successfully', insertedData });
   } catch (error) {
     console.error('Error adding product:', error);
-    res.status(500).json({ error: 'Internal Server Error', message: error.message });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
-// Implement a function to get the model based on category
-function getModelByCategory(category) {
-  // Add logic to map categories to the corresponding models
-  // Replace 'YourModelForCategory' with the actual model for each category
-  switch (category) {
-    case 'Grocery':
-      return Grocery; // Replace with your actual model
-    case 'Mobiles':
-      return Mobiles; // Replace with your actual model
-    // Add more cases for other categories
-    default:
-      return null;
+router.post('/editImage/:productId/:index', async (req, res) => {
+  const productId = req.params.productId;
+  const index = req.params.index;
+  const imageData = req.body.image; // Assuming you're sending the base64-encoded image data in the 'image' field
+
+  // Example update logic (assuming you have a Product model)
+  const product = await Products.findById(productId);
+  
+  if (product) {
+    // Update the product.images array with the new base64-encoded image data
+    product.images[index] = imageData;
+    
+    try {
+      await product.save();
+      res.json({ success: true, message: 'Image updated successfully' });
+    } catch (error) {
+      console.error('Error saving image:', error);
+      res.json({ success: false, message: 'Failed to update image' });
+    }
+  } else {
+    res.json({ success: false, message: 'Product not found' });
   }
-}
+});
+
+router.post('/deleteImage/:productId/:index', async (req, res) => {
+  const productId = req.params.productId;
+  const index = req.params.index;
+
+  try {
+    const product = await Products.findById(productId);
+
+    if (product) {
+      product.images.splice(index, 1); // Remove the image at the specified index
+      await product.save();
+      res.json({ success: true, message: 'Image deleted successfully' });
+    } else {
+      res.json({ success: false, message: 'Product not found' });
+    }
+  } catch (error) {
+    console.error('Error deleting image:', error);
+    res.json({ success: false, message: 'Failed to delete image' });
+  }
+});
+
+router.get('/orders', async (req, res) => {
+  try {
+    const orders = await Order.find().sort({ _id: -1 });
+    res.json(orders);
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+router.get('/user/:id', async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    // Fetch user details from the database
+    const user = await Users.findById(userId);
+
+    if (user) {
+      // Return user details
+      res.status(200).json(user);
+    } else {
+      // User not found
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    // Handle errors
+    console.error('Error fetching user details:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// Update the product status within an order
+router.put('/orders/:orderId/products/:productId', async (req, res) => {
+  const { orderId, productId } = req.params;
+  const { status } = req.body;
+
+  try {
+    // Find the order by ID
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    // Find the product within the order and update the status
+    const product = order.products.id(productId);
+
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found within the order' });
+    }
+
+    product.status = status;
+
+    // Save the updated order
+    await order.save();
+
+    // Send the updated order back
+    res.json(order);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+router.get('/products/:productId', async (req, res) => {
+  const productId = req.params.productId;
+
+  try {
+    const product = await Products.findById(productId);
+
+    if (product) {
+      res.json(product);
+    } else {
+      res.status(404).json({ error: 'Product not found' });
+    }
+  } catch (error) {
+    console.error('Error fetching product details:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 
 module.exports = router;

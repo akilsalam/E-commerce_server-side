@@ -39,9 +39,9 @@ const UserSchema = new mongoose.Schema({
       required:true
     },
     phone: {
-      type: String, // Change the type to String
-      required: true
-  },
+      type: String,
+      required: true,
+    },
     email:{
         type:String,
         required:true
@@ -103,13 +103,53 @@ const ProductSchema = new mongoose.Schema({
       },
       thumbnail: {
         type: String,
-        // required: true
+        required: true
       },
     //   isAdded:{
     //     type:Boolean
-    //   }
+    //   },
 
 });
+
+const OrderSchema = new mongoose.Schema({
+  customerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+  products: [{
+    productId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+    },
+    title:{
+      type:String,
+      // required:true,
+    },
+    category:{
+      type:String,
+      // required:true,
+    },
+    quantity: {
+      type: Number,
+      required: true,
+    },
+    totalAmount: {
+      type: Number,
+      required: true,
+    },
+    date: {
+      type: Date,
+      default: Date.now,
+    },
+    status:{
+      type:String
+    } 
+  }],
+}, {
+  timestamps: true
+});
+
 
 const Lights = mongoose.model('Lights',ProductSchema)
 const Fragrances = mongoose.model('Fragrances',ProductSchema)
@@ -133,8 +173,10 @@ const Mobiles = mongoose.model('MobileItem',ProductSchema)
 const Grocery = mongoose.model('GroceryItem', ProductSchema);
 const Admin = new mongoose.model("admin",AdminSchema)
 const Users = new mongoose.model("users",UserSchema)
+const Products = new mongoose.model("Products", ProductSchema)
 const Carts = mongoose.model('carts', ProductSchema);
 const WishList = mongoose.model('wishlist', ProductSchema);
+const Order = mongoose.model('Order', OrderSchema);
 
 
-module.exports = {Users,Admin,Grocery,Mobiles,Fashions,Electronics,HomeFurniture,Appliances,BeautyToys,TwoWheelers,MensClothes,MensFootwear,MensWatches,Bags,WomensClothes,WomensFootwear,WomensWatches,WomensJewellery,Automotives,Sunglasses,Fragrances,Lights,Carts,WishList}
+module.exports = {Users,Admin,Products,Order,Grocery,Mobiles,Fashions,Electronics,HomeFurniture,Appliances,BeautyToys,TwoWheelers,MensClothes,MensFootwear,MensWatches,Bags,WomensClothes,WomensFootwear,WomensWatches,WomensJewellery,Automotives,Sunglasses,Fragrances,Lights,Carts,WishList}
