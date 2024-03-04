@@ -151,9 +151,9 @@ const OrderSchema = new mongoose.Schema({
       required: true,
     },
     date: {
-      type: Date,
-      default: Date.now,
-    },
+      type: String,
+      default: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true }),
+    },    
     status:{
       type:String
     } 
