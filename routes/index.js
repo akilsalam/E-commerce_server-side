@@ -10,7 +10,7 @@ const crypto =require('crypto')
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.json('hi');
+  res.json('hello');
 });
 
 router.post('/profile', async function (req, res, next) {
