@@ -224,7 +224,7 @@ router.delete('/cart/:productId', async (req, res) => {
 
 router.get('/carts', async (req, res) => {
   try {
-    const cartProducts = await Carts.find().timeout(30000);
+    const cartProducts = await Carts.find();
     res.json(cartProducts);
   } catch (error) {
     console.error('Error fetching data:', error);
