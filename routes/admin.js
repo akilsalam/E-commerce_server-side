@@ -141,7 +141,7 @@ router.delete('/deleteUser/:id', async (req, res, next) => {
 
 router.get('/products', async (req, res) => {
   try {
-    const products = await Products.find().sort({ _id: -1 }).lean();
+    const products = await Products.find().timeout(30000);
     res.json(products);
   } catch (error) {
     console.error('Error fetching data:', error);
@@ -302,7 +302,7 @@ router.post('/deleteImage/:productId/:index', async (req, res) => {
 
 router.get('/orders', async (req, res) => {
   try {
-    const orders = await Order.find().sort({ _id: -1 });
+    const orders = await Order.find().timeout(30000);
     res.json(orders);
   } catch (error) {
     console.error('Error fetching data:', error);
