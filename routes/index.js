@@ -5,12 +5,13 @@ const  {Users, Carts, WishList, Products, Order, Rate} = require('../config/conf
 const CryptoJS = require('crypto-js');
 const Razorpay = require('razorpay')
 require('dotenv').config();
-const crypto =require('crypto')
+const crypto =require('crypto');
+const { path } = require('../app');
 
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.json('hello');
+  res.sendFile(path.join(__dirname, "client" , "build" , "index.html"))
 });
 
 router.post('/profile', async function (req, res, next) {

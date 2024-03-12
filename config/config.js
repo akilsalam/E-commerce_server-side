@@ -1,5 +1,5 @@
 const mongoose = require("mongoose")
-const connect = mongoose.connect('mongodb://127.0.0.1:27017/E-Commerce_Website');
+const connect = mongoose.connect(process.env.MONGODB_URL);
 
 //check database connected or not 
 connect.then(()=>{
