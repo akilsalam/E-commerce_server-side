@@ -141,7 +141,7 @@ router.delete('/deleteUser/:id', async (req, res, next) => {
 
 router.get('/products', async (req, res) => {
   try {
-    const products = await Products.find().timeout(30000);
+    const products = await Products.find().sort({ _id: -1 }).lean();
     res.json(products);
   } catch (error) {
     console.error('Error fetching data:', error);
