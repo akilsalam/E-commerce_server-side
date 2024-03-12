@@ -6,12 +6,13 @@ const CryptoJS = require('crypto-js');
 const Razorpay = require('razorpay')
 require('dotenv').config();
 const crypto =require('crypto');
-const { path } = require('../app');
+// const { path } = require('../app');
 
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.sendFile(path.join(__dirname, "client" , "build" , "index.html"))
+  // res.sendFile(path.join(__dirname, "client" , "build" , "index.html"))
+  res.json('Hello')
 });
 
 router.post('/profile', async function (req, res, next) {
