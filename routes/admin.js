@@ -149,7 +149,6 @@ router.get('/products', async (req, res) => {
   }
 });
 
-
 router.get('/otherImages/:id', async (req, res) => {
   const productId = req.params.id;
 
