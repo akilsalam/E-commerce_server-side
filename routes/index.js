@@ -12,7 +12,7 @@ const crypto =require('crypto');
 /* GET home page. */
 router.get('/', function(req, res, next) {
   // res.sendFile(path.join(__dirname, "client" , "build" , "index.html"))
-  res.json('Hello')
+  res.json('Hell')
 });
 
 router.post('/profile', async function (req, res, next) {
