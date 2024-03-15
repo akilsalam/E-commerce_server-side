@@ -2,7 +2,6 @@ var express = require('express');
 var router = express.Router();
 const bcrypt = require('bcrypt')
 const  {Users, Carts, WishList, Products, Order, Rate} = require('../config/config');
-const CryptoJS = require('crypto-js');
 const Razorpay = require('razorpay')
 require('dotenv').config();
 const crypto =require('crypto');
@@ -786,6 +785,8 @@ router.post('/rateProduct/:productId', async (req, res) => {
   try {
     const { productId } = req.params;
     const { rating } = req.body;
+    console.log(productId);
+    console.log(rating);
 
     // Find or create a Rate document for the given productId
     let rate = await Rate.findOne({ ProductId: productId });
